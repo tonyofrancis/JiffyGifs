@@ -78,7 +78,7 @@ public class GifListFragment extends Fragment implements GifService.Callback {
             public boolean onQueryTextSubmit(String query) {
 
                 //Query Database Asynchronously and return results to this fragment
-                GifService.getInstance()
+                GifService.getInstance(getActivity())
                         .queryDatabaseAsync(query,GifListFragment.this);
 
                 return true;
@@ -99,7 +99,7 @@ public class GifListFragment extends Fragment implements GifService.Callback {
 
 
         //When Fragment become visible, fetch trending GIFS from database
-        GifService.getInstance()
+        GifService.getInstance(getActivity())
                 .fetchTrendingFromDatabaseAsync(this);
     }
 

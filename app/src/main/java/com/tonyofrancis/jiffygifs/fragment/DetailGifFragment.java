@@ -65,7 +65,7 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
     public void onResume() {
         super.onResume();
 
-        GifService.getInstance()
+        GifService.getInstance(getActivity())
                 .fetchGifWithIdAsync(mGifId,this);
     }
 
