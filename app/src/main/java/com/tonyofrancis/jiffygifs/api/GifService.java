@@ -9,6 +9,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -40,6 +41,7 @@ public final class GifService {
     public interface Callback {
 
         void onDataLoaded(List<GifItem> dataSet);
+        void onDataLoaded(GifItem gifItem);
     }
 
     /**Method used to query the GifService for specific GIFS
@@ -92,6 +94,29 @@ public final class GifService {
 
     }
 
+    public void fetchGifWithIdAsync(String id, final Callback callback) {
+
+        if(callback != null) {
+
+            mGifServiceAPI.queryId(id)
+                    .enqueue(new retrofit2.Callback<GifItemResult>() {
+                        @Override
+                        public void onResponse(Call<GifItemResult> call, Response<GifItemResult> response) {
+
+                            if(response.isSuccessful()) {
+
+                                callback.onDataLoaded(response.body().getData());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<GifItemResult> call, Throwable t) {
+
+                        }
+                    });
+        }
+    }
+
     /**Get a configured retrofit instance that will be
     * used to communicate with the GIF Service*/
     private Retrofit getDefaultRetrofitConfiguration() {
@@ -114,6 +139,8 @@ public final class GifService {
         @GET("/v1/gifs/trending?&api_key="+API_KEY)
         Call<GifItemResults> queryTrending();
 
+        @GET("/v1/gifs/{id}?&api_key="+API_KEY)
+        Call<GifItemResult> queryId(@Path("id")String id);
     }
 
     /**Helper class used to Map GifItems from thr GifServiceAPI*/
@@ -125,6 +152,19 @@ public final class GifService {
         }
 
         public void setData(List<GifItem> data) {
+            this.data = data;
+        }
+    }
+
+    /**Helper class used to Map GifItems from thr GifServiceAPI*/
+    private static class GifItemResult {
+        private GifItem data;
+
+        public GifItem getData() {
+            return data;
+        }
+
+        public void setData(GifItem data) {
             this.data = data;
         }
     }

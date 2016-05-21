@@ -3,9 +3,9 @@ package com.tonyofrancis.jiffygifs.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,10 +38,37 @@ public class GifListFragment extends Fragment implements GifService.Callback {
 
         //Setup RecyclerView that will contain the GIF Items
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.gif_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        final int spanCount = getResources().getInteger(R.integer.gif_grid_span_count);
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(spanCount,StaggeredGridLayoutManager.VERTICAL));
 
         mGifListAdapter = new GifListAdapter(getActivity());
         recyclerView.setAdapter(mGifListAdapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int visibleItemCount = recyclerView.getLayoutManager().getChildCount();
+                int totalItemCount = recyclerView.getLayoutManager().getItemCount();
+
+                int[] firstVisibleItemsPosition = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
+                        .findFirstVisibleItemPositions(null);
+
+                if (visibleItemCount + firstVisibleItemsPosition[0] >= totalItemCount &&
+                        firstVisibleItemsPosition[0] >= 0 && totalItemCount >= mGifListAdapter.getItemCount()) {
+//
+//                    MovieService.getInstance(getActivity().getApplicationContext())
+//                            .fetchMoreFromPopularMovieListAsync(PopularMovieListFragment.this);
+                }
+            }
+        });
         
         
         //Setup SearchView
@@ -83,5 +110,10 @@ public class GifListFragment extends Fragment implements GifService.Callback {
     @Override
     public void onDataLoaded(List<GifItem> dataSet) {
         mGifListAdapter.swapDataSet(dataSet);
+    }
+
+    @Override
+    public void onDataLoaded(GifItem gifItem) {
+
     }
 }

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.tonyofrancis.jiffygifs.R;
+import com.tonyofrancis.jiffygifs.activity.DetailGifActivity;
 import com.tonyofrancis.jiffygifs.model.GifItem;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
     @Override
     public void onBindViewHolder(GifViewHolder holder, int position) {
-        holder.bind(mContext,mDataSet.get(position));
+        holder.bind(mDataSet.get(position));
     }
 
     @Override
@@ -56,21 +57,22 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
         notifyDataSetChanged();
     }
 
-    public static class GifViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class GifViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private ImageView mImageView;
         private String id;
 
         public GifViewHolder(View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
             mImageView = (ImageView) itemView.findViewById(R.id.gif_image_view);
         }
 
-        public void bind(Context context,GifItem gifItem) {
+        public void bind(GifItem gifItem) {
             this.id = gifItem.getId();
 
             //Display GIF Still image into the ImageView
-            Picasso.with(context)
+            Picasso.with(mContext)
                     .load(gifItem.getImages().getOriginal_still().getUrl())
                     .into(mImageView);
 
@@ -78,7 +80,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
         @Override
         public void onClick(View v) {
-
+            mContext.startActivity(DetailGifActivity.newIntent(mContext,id));
         }
     }
 }
