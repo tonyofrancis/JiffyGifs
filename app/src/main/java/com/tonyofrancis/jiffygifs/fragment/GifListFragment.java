@@ -3,21 +3,25 @@ package com.tonyofrancis.jiffygifs.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.tonyofrancis.jiffygifs.R;
 import com.tonyofrancis.jiffygifs.adapter.GifListAdapter;
+import com.tonyofrancis.jiffygifs.api.GifService;
+import com.tonyofrancis.jiffygifs.model.GifItem;
+
+import java.util.List;
 
 /**
  * Created by tonyofrancis on 5/20/16.
  */
 
-public class GifListFragment extends Fragment {
+public class GifListFragment extends Fragment implements GifService.Callback {
 
 
     private GifListAdapter mGifListAdapter;
@@ -33,8 +37,7 @@ public class GifListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_gif_list,container,false);
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.gif_recycler_view);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(R.integer.gif_grid_span_count
-                ,StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mGifListAdapter = new GifListAdapter(getActivity());
         recyclerView.setAdapter(mGifListAdapter);
@@ -46,8 +49,8 @@ public class GifListFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
-                // TODO: 5/21/16 Call service to process string
+                GifService.getInstance()
+                        .queryDatabaseAsync(query,GifListFragment.this);
                 return true;
             }
 
@@ -57,8 +60,6 @@ public class GifListFragment extends Fragment {
             }
         });
 
-        // TODO: 5/20/16 Set query Listener here
-
         return view;
     }
 
@@ -66,6 +67,12 @@ public class GifListFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        // TODO: 5/20/16 Call api here
+        GifService.getInstance()
+                .fetchFromDatabaseAsync(this);
+    }
+
+    @Override
+    public void onDataLoaded(List<GifItem> dataSet) {
+        mGifListAdapter.swapDataSet(dataSet);
     }
 }
