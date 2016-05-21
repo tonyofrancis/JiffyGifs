@@ -6,15 +6,15 @@ package com.tonyofrancis.jiffygifs.model;
 
 public final class GifItem {
 
-    private String Id;
+    private String id;
     private Images images;
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        Id = id;
+        this.id = id;
     }
 
     public Images getImages() {
@@ -29,6 +29,7 @@ public final class GifItem {
     public static class Images {
 
         private Original original;
+        private Original original_still;
 
         public Original getOriginal() {
             return original;
@@ -36,6 +37,14 @@ public final class GifItem {
 
         public void setOriginal(Original original) {
             this.original = original;
+        }
+
+        public Original getOriginal_still() {
+            return original_still;
+        }
+
+        public void setOriginal_still(Original original_stills) {
+            this.original_still = original_stills;
         }
     }
 
@@ -79,4 +88,5 @@ public final class GifItem {
             this.mp4 = mp4;
         }
     }
+
 }

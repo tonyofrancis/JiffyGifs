@@ -5,4 +5,5 @@
 
     <!-- Unit resources -->
     <dimen name="ten_dp">10dp</dimen>
+    <dimen name="two_dp">2dp</dimen>
 </resources>

@@ -5,7 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
 import com.tonyofrancis.jiffygifs.R;
 import com.tonyofrancis.jiffygifs.model.GifItem;
 
@@ -30,14 +32,12 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
     @Override
     public GifViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        View view = LayoutInflater.from(mContext).inflate(R.layout.gif_item,parent,false);
-        return new GifViewHolder(view);
+        return new GifViewHolder(LayoutInflater.from(mContext).inflate(R.layout.gif_item,parent,false));
     }
 
     @Override
     public void onBindViewHolder(GifViewHolder holder, int position) {
-        holder.bind(mDataSet.get(position));
+        holder.bind(mContext,mDataSet.get(position));
     }
 
     @Override
@@ -58,14 +58,22 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
     public static class GifViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private String Id;
+        private ImageView mImageView;
+        private String id;
 
         public GifViewHolder(View itemView) {
             super(itemView);
+            mImageView = (ImageView) itemView.findViewById(R.id.gif_image_view);
         }
 
-        public void bind(GifItem gifItem) {
-            this.Id = gifItem.getId();
+        public void bind(Context context,GifItem gifItem) {
+            this.id = gifItem.getId();
+
+            //Display GIF Still image into the ImageView
+            Picasso.with(context)
+                    .load(gifItem.getImages().getOriginal_still().getUrl())
+                    .into(mImageView);
+
         }
 
         @Override

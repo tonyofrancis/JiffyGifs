@@ -36,6 +36,7 @@ public class GifListFragment extends Fragment implements GifService.Callback {
 
         View view = inflater.inflate(R.layout.fragment_gif_list,container,false);
 
+        //Setup RecyclerView that will contain the GIF Items
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.gif_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -44,13 +45,15 @@ public class GifListFragment extends Fragment implements GifService.Callback {
         
         
         //Setup SearchView
-
         SearchView searchView = (SearchView) view.findViewById(R.id.gif_search_view);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+
+                //Query Database Asynchronously and return results to this fragment
                 GifService.getInstance()
                         .queryDatabaseAsync(query,GifListFragment.this);
+
                 return true;
             }
 
@@ -64,13 +67,19 @@ public class GifListFragment extends Fragment implements GifService.Callback {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
+
+        //When Fragment become visible, fetch trending GIFS from database
         GifService.getInstance()
-                .fetchFromDatabaseAsync(this);
+                .fetchTrendingFromDatabaseAsync(this);
     }
 
+    /** Callback method used by this fragment to receive the GIF dataSet
+     * that will be displayed in the RecyclerView.
+     * @param dataSet - List of GIF items that will be displayed in a RecyclerView
+     * */
     @Override
     public void onDataLoaded(List<GifItem> dataSet) {
         mGifListAdapter.swapDataSet(dataSet);
