@@ -1,4 +1,4 @@
-package com.tonyofrancis.jiffygifs;
+package com.tonyofrancis.jiffygifs.activity.jiffygifs;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
