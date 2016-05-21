@@ -43,8 +43,21 @@ public class GifListFragment extends Fragment {
         //Setup SearchView
 
         SearchView searchView = (SearchView) view.findViewById(R.id.gif_search_view);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
 
-        // TODO: 5/20/16 Set queury Listener here 
+                // TODO: 5/21/16 Call service to process string
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        // TODO: 5/20/16 Set query Listener here
 
         return view;
     }

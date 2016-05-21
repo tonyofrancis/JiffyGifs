@@ -2,9 +2,11 @@ package com.tonyofrancis.jiffygifs.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.tonyofrancis.jiffygifs.R;
 import com.tonyofrancis.jiffygifs.model.GifItem;
 
 import java.util.ArrayList;
@@ -29,8 +31,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
     @Override
     public GifViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View view = null;
-
+        View view = LayoutInflater.from(mContext).inflate(R.layout.gif_item,parent,false);
         return new GifViewHolder(view);
     }
 
@@ -57,16 +58,18 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
     public static class GifViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        private String Id;
+
         public GifViewHolder(View itemView) {
             super(itemView);
         }
 
-        @Override
-        public void onClick(View v) {
-
+        public void bind(GifItem gifItem) {
+            this.Id = gifItem.getId();
         }
 
-        public void bind(GifItem gifItem) {
+        @Override
+        public void onClick(View v) {
 
         }
     }
