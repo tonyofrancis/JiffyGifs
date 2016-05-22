@@ -61,12 +61,14 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
         mGifId = args.getString(GIF_ID);
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
 
-        GifService.getInstance(getActivity())
+        GifService.getInstance(getActivity().getApplication())
                 .fetchGifWithIdAsync(mGifId,this);
+
     }
 
     @Override

@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.tonyofrancis.jiffygifs.R;
 import com.tonyofrancis.jiffygifs.adapter.GifListAdapter;
 import com.tonyofrancis.jiffygifs.api.GifService;
+import com.tonyofrancis.jiffygifs.helpers.SpacesItemDecoration;
 import com.tonyofrancis.jiffygifs.model.GifItem;
 
 import java.util.List;
@@ -23,12 +24,15 @@ import java.util.List;
 
 public class GifListFragment extends Fragment implements GifService.Callback {
 
-
+    private static final int SPAN_SIZE = 2;
+    private static final int SPACE_DECOR_SIZE = 20;
     private GifListAdapter mGifListAdapter;
+
 
     public static GifListFragment newInstance() {
         return new GifListFragment();
     }
+
 
     @Nullable
     @Override
@@ -39,36 +43,52 @@ public class GifListFragment extends Fragment implements GifService.Callback {
         //Setup RecyclerView that will contain the GIF Items
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.gif_recycler_view);
 
-        final int spanCount = getResources().getInteger(R.integer.gif_grid_span_count);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(spanCount,StaggeredGridLayoutManager.VERTICAL));
+        StaggeredGridLayoutManager layoutManager
+                = new StaggeredGridLayoutManager(SPAN_SIZE,StaggeredGridLayoutManager.VERTICAL);
+
+        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+
+        recyclerView.setLayoutManager(layoutManager); //Set LayoutManager
+
+        recyclerView.addItemDecoration(new SpacesItemDecoration(SPACE_DECOR_SIZE));
+
 
         mGifListAdapter = new GifListAdapter(getActivity());
         recyclerView.setAdapter(mGifListAdapter);
-
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                int visibleItemCount = recyclerView.getLayoutManager().getChildCount();
-                int totalItemCount = recyclerView.getLayoutManager().getItemCount();
-
-                int[] firstVisibleItemsPosition = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
-                        .findFirstVisibleItemPositions(null);
-
-                if (visibleItemCount + firstVisibleItemsPosition[0] >= totalItemCount &&
-                        firstVisibleItemsPosition[0] >= 0 && totalItemCount >= mGifListAdapter.getItemCount()) {
 //
-//                    MovieService.getInstance(getActivity().getApplicationContext())
-//                            .fetchMoreFromPopularMovieListAsync(PopularMovieListFragment.this);
-                }
-            }
-        });
+//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//            }
+//
+//            @Override
+//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//
+//                int totalItemCount = recyclerView.getLayoutManager().getItemCount();
+//
+//                int[] lastVisibleItemsPosition = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
+//                        .findLastVisibleItemPositions(null);
+//
+//
+//                int max = 0;
+//
+//                for (int x = 0; x < lastVisibleItemsPosition.length;x++) {
+//                    if (lastVisibleItemsPosition[x] > max) {
+//                        max = lastVisibleItemsPosition[x];
+//                    }
+//                }
+//
+//                if(max + lastVisibleItemsPosition.length >= totalItemCount) {
+//
+////                    GifService.getInstance(getActivity())
+////                            .fetchTrendingFromDatabaseAsync(GifListFragment.this,totalItemCount+1);
+//                }
+//
+//            }
+//        });
         
         
         //Setup SearchView
@@ -78,8 +98,8 @@ public class GifListFragment extends Fragment implements GifService.Callback {
             public boolean onQueryTextSubmit(String query) {
 
                 //Query Database Asynchronously and return results to this fragment
-                GifService.getInstance(getActivity())
-                        .queryDatabaseAsync(query,GifListFragment.this);
+                GifService.getInstance(getActivity().getApplication())
+                        .queryDatabaseAsync(GifListFragment.this,query);
 
                 return true;
             }
@@ -97,9 +117,8 @@ public class GifListFragment extends Fragment implements GifService.Callback {
     public void onStart() {
         super.onStart();
 
-
         //When Fragment become visible, fetch trending GIFS from database
-        GifService.getInstance(getActivity())
+        GifService.getInstance(getActivity().getApplication())
                 .fetchTrendingFromDatabaseAsync(this);
     }
 

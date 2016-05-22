@@ -20,7 +20,7 @@ import java.util.List;
  */
 
 public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewHolder> {
-
+    
     private List<GifItem> mDataSet;
     private Context mContext;
 
@@ -33,7 +33,17 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
     @Override
     public GifViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new GifViewHolder(LayoutInflater.from(mContext).inflate(R.layout.gif_item,parent,false));
+        return new GifViewHolder(LayoutInflater.from(mContext).inflate(viewType,parent,false));
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+
+        if(position % 2 == 0) {
+            return R.layout.gif_item_one;
+        }
+
+        return R.layout.gif_item_two;
     }
 
     @Override
@@ -80,6 +90,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
         @Override
         public void onClick(View v) {
+
             mContext.startActivity(DetailGifActivity.newIntent(mContext,id));
         }
     }
