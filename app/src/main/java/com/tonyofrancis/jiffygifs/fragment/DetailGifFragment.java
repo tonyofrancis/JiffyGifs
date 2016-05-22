@@ -44,7 +44,6 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
         View view = inflater.inflate(R.layout.fragment_gif_detail,container,false);
 
         mVideoView = (VideoView) view.findViewById(R.id.gif_video_view);
-
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {

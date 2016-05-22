@@ -67,7 +67,18 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
         notifyDataSetChanged();
     }
 
-    public class GifViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public void mergeDataSet(List<GifItem> newDataSet) {
+
+        if(newDataSet == null) {
+            return;
+        }
+
+        int currentSize = getItemCount();
+        mDataSet.addAll(newDataSet);
+        notifyItemRangeInserted(currentSize+1,newDataSet.size());
+    }
+
+    public static class GifViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private ImageView mImageView;
         private String id;
@@ -82,7 +93,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
             this.id = gifItem.getId();
 
             //Display GIF Still image into the ImageView
-            Picasso.with(mContext)
+            Picasso.with(mImageView.getContext())
                     .load(gifItem.getImages().getOriginal_still().getUrl())
                     .into(mImageView);
 
@@ -90,8 +101,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
         @Override
         public void onClick(View v) {
-
-            mContext.startActivity(DetailGifActivity.newIntent(mContext,id));
+            v.getContext().startActivity(DetailGifActivity.newIntent(v.getContext(),id));
         }
     }
 }

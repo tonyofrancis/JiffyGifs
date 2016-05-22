@@ -6,4 +6,10 @@
     <!-- Unit resources -->
     <dimen name="ten_dp">10dp</dimen>
     <dimen name="two_dp">2dp</dimen>
-</resources>
+
+    <!-- Image Sizes -->
+    <dimen name="small_image_width">320dp</dimen>
+    <dimen name="small_image_height">178dp</dimen>
+    <dimen name="large_image_width">500dp</dimen>
+    <dimen name="large_image_height">350dp</dimen>
+ </resources>
