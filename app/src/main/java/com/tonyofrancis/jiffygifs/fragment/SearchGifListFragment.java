@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.tonyofrancis.jiffygifs.R;
 import com.tonyofrancis.jiffygifs.adapter.GifListAdapter;
 import com.tonyofrancis.jiffygifs.api.GifService;
+import com.tonyofrancis.jiffygifs.helpers.Searchable;
 import com.tonyofrancis.jiffygifs.helpers.SpacesItemDecoration;
 import com.tonyofrancis.jiffygifs.model.GifItem;
 
@@ -22,20 +23,71 @@ import java.util.List;
  * Created by tonyofrancis on 5/20/16.
  */
 
-public class GifListFragment extends Fragment implements GifService.Callback{
+public class SearchGifListFragment extends Fragment implements Searchable, GifService.Callback {
 
+    private static final String QUERY = "com.tonyofrancis.search.query";
+
+    private String mQuery;
+    private boolean isNewSearch;
     private GifListAdapter mGifListAdapter;
+    private StaggeredGridLayoutManager mStaggeredGridLayoutManager;
 
 
-    public static GifListFragment newInstance() {
-        return new GifListFragment();
+    public static SearchGifListFragment newInstance() {
+
+        return new SearchGifListFragment();
     }
 
+    @Override
+    public boolean performSearch(String query) {
+
+        if(query == null) {
+            return false;
+        }
+
+        mQuery = query;
+        isNewSearch = true;
+
+        GifService.getInstance(getActivity().getApplication())
+                .queryDatabaseAsync(this, mQuery);
+
+        return true;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if(savedInstanceState == null) {
+            mQuery = getString(R.string.default_query);
+            isNewSearch = true;
+        } else {
+            mQuery = savedInstanceState.getString(QUERY);
+            isNewSearch = false;
+        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(QUERY,mQuery);
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        GifService.getInstance(getActivity().getApplication())
+                .queryDatabaseAsync(this,mQuery);
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        super.onCreateView(inflater,container,savedInstanceState);
+            super.onCreateView(inflater,container,savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_gif_list,container,false);
 
@@ -43,11 +95,10 @@ public class GifListFragment extends Fragment implements GifService.Callback{
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.gif_recycler_view);
 
         final int span_size = getResources().getInteger(R.integer.col_span_size);
-        StaggeredGridLayoutManager layoutManager
-                = new StaggeredGridLayoutManager(span_size,StaggeredGridLayoutManager.VERTICAL);
+        mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(span_size,StaggeredGridLayoutManager.VERTICAL);
 
-        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
-        recyclerView.setLayoutManager(layoutManager); //Set LayoutManager
+        mStaggeredGridLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+        recyclerView.setLayoutManager(mStaggeredGridLayoutManager); //Set LayoutManager
 
         final int decorSize = getResources().getInteger(R.integer.space_decor_size);
         recyclerView.addItemDecoration(new SpacesItemDecoration(decorSize));
@@ -61,21 +112,16 @@ public class GifListFragment extends Fragment implements GifService.Callback{
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        //When Fragment become visible, fetch trending GIFS from database
-        GifService.getInstance(getActivity().getApplication())
-                .fetchTrendingFromDatabaseAsync(this);
-    }
-
-    /** Callback method used by this fragment to receive the GIF dataSet
-     * that will be displayed in the RecyclerView.
-     * @param dataSet - List of GIF items that will be displayed in a RecyclerView
-     * */
-    @Override
     public void onDataLoaded(List<GifItem> dataSet) {
-        mGifListAdapter.mergeDataSet(dataSet);
+
+        if(isNewSearch) {
+            mStaggeredGridLayoutManager.scrollToPositionWithOffset(0,0);
+            mGifListAdapter.swapDataSet(dataSet);
+        } else {
+            mGifListAdapter.mergeDataSet(dataSet);
+        }
+
+        isNewSearch = false;
     }
 
     @Override
@@ -112,9 +158,8 @@ public class GifListFragment extends Fragment implements GifService.Callback{
 
                     mVisited.put(mGifListAdapter.getItemCount(),true);
                     GifService.getInstance(getActivity().getApplication())
-                            .fetchTrendingFromDatabaseAsync(GifListFragment.this,mGifListAdapter.getItemCount()+1);
+                            .queryDatabaseAsync(SearchGifListFragment.this,mQuery,mGifListAdapter.getItemCount() + 1);
                 }
         }
     };
-
 }

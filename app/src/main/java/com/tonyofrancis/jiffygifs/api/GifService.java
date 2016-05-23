@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.support.v4.util.ArrayMap;
+import android.support.v4.util.LruCache;
 
 import com.tonyofrancis.jiffygifs.model.GifItem;
 
@@ -32,13 +33,17 @@ public final class GifService {
 
     private static GifService sGifService;
 
+    private LruCache<String,GifItem> mCache;
+
     private GifServiceAPI mGifServiceAPI;
     private Context mContext;
 
     private GifService(Context packageContext) {
         mContext = packageContext;
+        mCache = new LruCache<>(GifServiceAPI.API_LIMIT);
         mGifServiceAPI = getDefaultRetrofitConfiguration()
                 .create(GifServiceAPI.class);
+
     }
 
     /**Use this method to get an instance of the GifService class*/
@@ -85,6 +90,7 @@ public final class GifService {
                         public void onResponse(Call<GifItemResults> call, Response<GifItemResults> response) {
 
                             if(response.isSuccessful()) {
+                                updateCache(response.body().getData());
                                 callback.onDataLoaded(response.body().getData());
                             }
                         }
@@ -115,6 +121,7 @@ public final class GifService {
                         public void onResponse(Call<GifItemResults> call, Response<GifItemResults> response) {
 
                             if (response.isSuccessful()) {
+                                updateCache(response.body().getData());
                                 callback.onDataLoaded(response.body().getData());
                             }
                         }
@@ -127,10 +134,33 @@ public final class GifService {
 
     }
 
+    private void updateCache(List<GifItem> dataSet) {
+
+        if(dataSet == null) {
+            return;
+        }
+
+        mCache.evictAll();
+
+        for (GifItem item: dataSet) {
+            mCache.put(item.getId(),item);
+        }
+    }
+
 
     public void fetchGifWithIdAsync(String id, final Callback callback) {
 
         if(callback != null) {
+
+            //If item is in local cache fetch it otherwise get it from the network
+            if(mCache != null) {
+                GifItem item = mCache.get(id);
+
+                if(item != null) {
+                    callback.onDataLoaded(item);
+                    return;
+                }
+            }
 
             mGifServiceAPI.queryId(id)
                     .enqueue(new retrofit2.Callback<GifItemResult>() {
@@ -149,6 +179,7 @@ public final class GifService {
                     });
         }
     }
+
 
     /**Get a configured retrofit instance that will be
     * used to communicate with the GIF Service*/

@@ -37,9 +37,21 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
         return fragment;
     }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            mGifId = savedInstanceState.getString(GIF_ID);
+        }
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        super.onCreateView(inflater,container,savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_gif_detail,container,false);
 
@@ -47,6 +59,7 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                //mp.setVolume(0,0);
                 mp.setLooping(true);
             }
         });
@@ -60,6 +73,13 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
         mGifId = args.getString(GIF_ID);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(GIF_ID,mGifId);
+
+    }
 
     @Override
     public void onResume() {
