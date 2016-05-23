@@ -9,7 +9,8 @@
 
     <ImageView
         android:id="@+id/gif_image_view"
-        android:scaleType="fitXY"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         android:layout_width="@dimen/large_image_width"
         android:layout_height="@dimen/large_image_height"/>
 

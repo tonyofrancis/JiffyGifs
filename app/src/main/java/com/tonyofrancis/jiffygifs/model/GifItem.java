@@ -2,6 +2,7 @@ package com.tonyofrancis.jiffygifs.model;
 
 /**
  * Created by tonyofrancis on 5/20/16.
+ * Model Class used to hold all information about the GIF
  */
 
 public final class GifItem {

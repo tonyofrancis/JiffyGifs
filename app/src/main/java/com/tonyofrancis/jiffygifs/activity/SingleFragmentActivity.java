@@ -9,6 +9,10 @@ import com.tonyofrancis.jiffygifs.R;
 
 /**
  * Created by tonyofrancis on 5/21/16.
+ *
+ * Abstract class that can be implemented by an activity that
+ * will host a single fragment. Subclasses must implement the
+ * createFragment method and return an instance of android.support.v4.app.Fragment
  */
 
 public abstract class SingleFragmentActivity extends AppCompatActivity {

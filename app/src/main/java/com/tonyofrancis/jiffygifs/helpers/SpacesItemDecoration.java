@@ -6,6 +6,8 @@ import android.view.View;
 
 /**
  * Created by tonyofrancis on 5/22/16.
+ * Class used to specify the amount of space
+ * around each item inside of a RecyclerView
  */
 
 public class SpacesItemDecoration extends RecyclerView.ItemDecoration {

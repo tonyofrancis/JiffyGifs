@@ -8,6 +8,9 @@ import com.tonyofrancis.jiffygifs.fragment.DetailGifFragment;
 
 /**
  * Created by tonyofrancis on 5/21/16.
+ *
+ * The DetailGifActivity is used to display a gif image in
+ * its original size
  */
 
 public class DetailGifActivity extends SingleFragmentActivity {
@@ -19,6 +22,13 @@ public class DetailGifActivity extends SingleFragmentActivity {
         return DetailGifFragment.newInstance(getIntent().getStringExtra(GIF_ID));
     }
 
+
+    /**Static method used to get a properly formatted intent to start this
+     * activity.
+     * @param packageContext - A context object
+     * @param id - The id string of a GifItem
+     * @return - properly formatted intent
+     * */
     public static Intent newIntent(Context packageContext,String id) {
 
         Intent intent = new Intent(packageContext,DetailGifActivity.class);
