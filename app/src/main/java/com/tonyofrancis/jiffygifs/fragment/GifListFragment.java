@@ -20,6 +20,10 @@ import java.util.List;
 
 /**
  * Created by tonyofrancis on 5/20/16.
+ *
+ * GifListFragment implements a RecyclerView and its functionality
+ * to properly display a list of Gif items. Specifically Trending Gifs
+ *
  */
 
 public class GifListFragment extends Fragment implements GifService.Callback{
@@ -27,6 +31,9 @@ public class GifListFragment extends Fragment implements GifService.Callback{
     private GifListAdapter mGifListAdapter;
 
 
+    /**Static method used to get a properly formatted GifListFragment
+     * @return - properly formatted GifListFragment
+     * */
     public static GifListFragment newInstance() {
         return new GifListFragment();
     }
@@ -64,7 +71,7 @@ public class GifListFragment extends Fragment implements GifService.Callback{
     public void onStart() {
         super.onStart();
 
-        //When Fragment become visible, fetch trending GIFS from database
+        //When Fragment starts, fetch trending GIFS from GifService
         GifService.getInstance(getActivity().getApplication())
                 .fetchTrendingFromDatabaseAsync(this);
     }
@@ -83,6 +90,8 @@ public class GifListFragment extends Fragment implements GifService.Callback{
 
     }
 
+    /**The mOnScrollListener object is attached to the recyclerView to implement
+     * infinite scrolling **/
     private RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
 
         private ArrayMap<Integer,Boolean> mVisited = new ArrayMap<>();
@@ -96,6 +105,8 @@ public class GifListFragment extends Fragment implements GifService.Callback{
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
 
+            /*When the users scrolls to the last row in the list, the GifService object is
+            * asked to fetch more related data for the list*/
             int[] lastVisibleItemsPosition = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
                                               .findLastVisibleItemPositions(null);
 
@@ -107,6 +118,8 @@ public class GifListFragment extends Fragment implements GifService.Callback{
                     }
                 }
 
+            //If we are in the last row and we have not loaded this information previously, fetch
+            // more items for the gif service
                 if(max + lastVisibleItemsPosition.length >= mGifListAdapter.getItemCount() &&
                         !mVisited.containsKey(mGifListAdapter.getItemCount())) {
 

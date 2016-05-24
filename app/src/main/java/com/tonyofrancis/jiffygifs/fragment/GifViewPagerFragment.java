@@ -19,6 +19,11 @@ import com.tonyofrancis.jiffygifs.helpers.Searchable;
 
 /**
  * Created by tonyofrancis on 5/22/16.
+ *
+ * The GifViewPagerFragment implements a ViewPager that displays two fragments.
+ * The GifListFragment and the SearchGifListFragment.
+ * The GifViewPagerFragment implements the FragmentStatePagerAdapter that is used to preserve
+ * the state of the pager's fragments.
  */
 
 public class GifViewPagerFragment extends Fragment {
@@ -26,8 +31,9 @@ public class GifViewPagerFragment extends Fragment {
     private Fragment[] mFragments;
     private ViewPager mViewPager;
 
-
-
+    /**Static method used to get a properly formatted GifViewPagerFragment
+     * @return - properly formatted GifViewPagerFragment
+     * */
     public static Fragment newInstance() {
         return new GifViewPagerFragment();
     }
@@ -37,16 +43,18 @@ public class GifViewPagerFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+
         if (savedInstanceState == null) {
             mFragments = new Fragment[]{
                     GifListFragment.newInstance(),
                     SearchGifListFragment.newInstance()};
         } else {
-            mFragments = new Fragment[2];
+            mFragments = new Fragment[2]; //Fragments will be restored by the viewpager's adapter
         }
 
-
     }
+
+
 
 
     @Nullable
@@ -56,6 +64,7 @@ public class GifViewPagerFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_gif_view_pager,container,false);
 
+
         mViewPager = (ViewPager) view.findViewById(R.id.gif_view_pager);
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.gif_tab_layout);
 
@@ -64,6 +73,7 @@ public class GifViewPagerFragment extends Fragment {
         mViewPager.setAdapter(new FragmentStatePagerAdapter(getFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
+
                 return mFragments[position];
             }
 
@@ -90,12 +100,12 @@ public class GifViewPagerFragment extends Fragment {
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
 
+                //Restore saved Fragment
                 Fragment fragment = (Fragment) super.instantiateItem(container,position);
                 mFragments[position] = fragment;
 
                 return fragment;
             }
-
 
         });
 
@@ -111,6 +121,10 @@ public class GifViewPagerFragment extends Fragment {
 
         inflater.inflate(R.menu.fragment_gif_list_menu,menu);
 
+        /*When the user types in a query in the searchView located in the actionbar the
+        * query is then submitted to the SearchFragment that performs the query and displays it
+        * in a separate list*/
+
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
 
         searchView.setOnSearchClickListener(new View.OnClickListener() {
@@ -120,13 +134,11 @@ public class GifViewPagerFragment extends Fragment {
             }
         });
 
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
                 mViewPager.setCurrentItem(1);
-
                 searchView.clearFocus();
                 return ((Searchable) mFragments[1]).performSearch(query);
             }

@@ -27,15 +27,20 @@ import retrofit2.http.QueryMap;
 
 /**
  * Created by tonyofrancis on 5/21/16.
+ *
+ * The GifService is a singleton class that is responsible
+ * for fetching and querying gif information from the Gliphy API
+ * or local cache. All fetching tasks are performed asynchronously
+ * and the results are returned to the callback object.
+ *
  */
 
 public final class GifService {
 
     private static GifService sGifService;
 
-    private LruCache<String,GifItem> mCache;
-
     private GifServiceAPI mGifServiceAPI;
+    private LruCache<String,GifItem> mCache; //local memory cache for gifs
     private Context mContext;
 
     private GifService(Context packageContext) {
@@ -46,7 +51,10 @@ public final class GifService {
 
     }
 
-    /**Use this method to get an instance of the GifService class*/
+    /**Use this method to get an instance of the GifService class
+     * @param packageContext - Application instance is encouraged because it is the longest
+     *                       lasting context
+     * */
     public static GifService getInstance(Application packageContext) {
 
         if(sGifService == null) {
@@ -56,7 +64,7 @@ public final class GifService {
         return sGifService;
     }
 
-    /**Callback interface must be implemented by objects wanting to retrieve data (GIFItems)
+    /**Callback interface that must be implemented by objects wanting to retrieve data (GIFItems)
      * from the GifService class*/
     public interface Callback {
         void onDataLoaded(List<GifItem> dataSet);
@@ -65,7 +73,7 @@ public final class GifService {
 
     /**Method used to query the GifService for specific GIFS
      * @param callback - Callback that dataSet will be passed to after fetching
-     *
+     *@param query  - Query String
      * */
     public void queryDatabaseAsync(Callback callback,String query) {
         this.queryDatabaseAsync(callback,query,GifServiceAPI.DEFAULT_OFFSET);
@@ -134,6 +142,10 @@ public final class GifService {
 
     }
 
+    /**This method updates the local LRUCache with
+     * the last fetched dataSet
+     * @param dataSet - recently fetched dataSet
+     * */
     private void updateCache(List<GifItem> dataSet) {
 
         if(dataSet == null) {
@@ -148,6 +160,11 @@ public final class GifService {
     }
 
 
+    /**Method used to fetch a single Gif Item. The local cache is checked
+     * first to find the gif. If the gif is not found a network call is placed
+     * @param id - Gif ID
+     * @param callback - Callback that dataSet will be passed to after fetching
+     * */
     public void fetchGifWithIdAsync(String id, final Callback callback) {
 
         if(callback != null) {
@@ -190,6 +207,9 @@ public final class GifService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
+
+    /**Get a configured OkHttpClient instance that supports local
+     * caching of network requests.*/
     private OkHttpClient getOkHttpCacheClient() {
         return new OkHttpClient.Builder()
                 .cache(new Cache(mContext.getCacheDir(),GifServiceAPI.API_CACHE_SIZE))
@@ -199,10 +219,16 @@ public final class GifService {
                         Request request = chain.request();
 
                         if(isNetworkAvailable()) {
+
+                            //If the network is available fetch new data every 5 mins from the network
+                            // otherwise use the local cache to fetch the last request.
                             request = request.newBuilder()
                                     .header("Cache-Control","public, max-age="+300)
                                     .build();
                         } else {
+
+                            //If the network is not available used the last cached request up
+                            // to 7 days ago
                             request = request.newBuilder()
                                     .header("Cache-Control","public, only-if-cached, max-stale="+ 60*60*24*7)
                                     .build();
@@ -214,6 +240,7 @@ public final class GifService {
                 .build();
     }
 
+    /**Method used to determine if the device is connected to a network*/
     public boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 

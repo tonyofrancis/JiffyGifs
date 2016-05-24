@@ -9,7 +9,7 @@ import com.tonyofrancis.jiffygifs.fragment.DetailGifFragment;
 /**
  * Created by tonyofrancis on 5/21/16.
  *
- * The DetailGifActivity is used to display a gif image in
+ * The DetailGifActivity is used to display a gif in
  * its original size
  */
 

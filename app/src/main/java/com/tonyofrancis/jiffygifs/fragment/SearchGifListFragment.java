@@ -21,6 +21,11 @@ import java.util.List;
 
 /**
  * Created by tonyofrancis on 5/20/16.
+ *
+ * SearchGifListFragment implements the search functionality of the application.
+ * This class uses the GifSerivce API to query the web service for Gifs related to
+ * the specific search term and the results are displayed in a recyclerView.
+ *
  */
 
 public class SearchGifListFragment extends Fragment implements Searchable, GifService.Callback {
@@ -33,11 +38,18 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
     private StaggeredGridLayoutManager mStaggeredGridLayoutManager;
 
 
+    /**Static method used to get a properly formatted SearchGifListFragment
+     * @return - properly formatted SearchGifListFragment
+     * */
     public static SearchGifListFragment newInstance() {
 
         return new SearchGifListFragment();
     }
 
+    /**Method that can be called by the hosting activity or fragment to perform
+     * a search query in the fragment
+     * @param query - Query String
+     * */
     @Override
     public boolean performSearch(String query) {
 
@@ -111,6 +123,9 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
         return view;
     }
 
+    /**DataSet returned by the GifService to update the search recyclerView
+     * @param dataSet - new dataSet
+     * */
     @Override
     public void onDataLoaded(List<GifItem> dataSet) {
 
@@ -129,6 +144,8 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
 
     }
 
+    /**The mOnScrollListener object is attached to the recyclerView to implement
+     * infinite scrolling **/
     private RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
 
         private ArrayMap<Integer,Boolean> mVisited = new ArrayMap<>();
@@ -153,6 +170,8 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
                     }
                 }
 
+            //If we are in the last row and we have not loaded this information previously fetch
+            // more items for the gif service
                 if(max + lastVisibleItemsPosition.length >= mGifListAdapter.getItemCount() &&
                         !mVisited.containsKey(mGifListAdapter.getItemCount())) {
 

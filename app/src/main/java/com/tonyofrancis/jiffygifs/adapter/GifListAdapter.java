@@ -17,6 +17,10 @@ import java.util.List;
 
 /**
  * Created by tonyofrancis on 5/20/16.
+ *
+ * GifListAdapter is a RecyclerView adapter that can be used to display
+ * GifItems. This adapter is smart enough to swap out an existing
+ * dataSet or merge new items with the current dataSet
  */
 
 public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewHolder> {
@@ -39,6 +43,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
     @Override
     public int getItemViewType(int position) {
 
+        //Get the proper view type for a gif item based on its position
         if(position % 2 == 0) {
             return R.layout.gif_item_one;
         }
@@ -56,6 +61,10 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
         return mDataSet.size();
     }
 
+    /**Method used to replace the entire dataSet held by
+     * the adapter
+     * @param newDataSet - new dataSet
+     * */
     public void swapDataSet(List<GifItem> newDataSet) {
 
         if(newDataSet == null) {
@@ -67,6 +76,10 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
         notifyDataSetChanged();
     }
 
+    /**Method used to merge new dataSet with the existing
+     * dataSet held by the adapter
+     * @param newDataSet - new dataSet
+     * */
     public void mergeDataSet(List<GifItem> newDataSet) {
 
         if(newDataSet == null) {
@@ -101,6 +114,7 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
         @Override
         public void onClick(View v) {
+            //Start the detailed activity when an item is selected in the list
             v.getContext().startActivity(DetailGifActivity.newIntent(v.getContext(),id));
         }
     }
