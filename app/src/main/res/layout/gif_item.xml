@@ -2,17 +2,17 @@
 <android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="@dimen/two_dp"
-    android:background="@color/light_gray"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/gif_image_view"
-        android:scaleType="centerCrop"
-        android:adjustViewBounds="true"
-        android:layout_width="@dimen/large_image_width"
-        android:layout_height="@dimen/large_image_height"/>
+        android:src="@color/light_gray"
+        android:scaleType="fitXY"
+        android:layout_width="@dimen/small_image_width"
+        android:layout_height="@dimen/small_image_height"/>
 
 </android.support.v7.widget.CardView>
 

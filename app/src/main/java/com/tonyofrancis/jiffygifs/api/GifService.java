@@ -51,32 +51,40 @@ public final class GifService {
 
     }
 
-    /**Use this method to get an instance of the GifService class
+    /**Use this method to create an instance of the GifService class
      * @param packageContext - Application instance is encouraged because it is the longest
      *                       lasting context
      * */
-    public static GifService getInstance(Application packageContext) {
+    public static void initialize(Application packageContext) {
 
         if(sGifService == null) {
             sGifService = new GifService(packageContext);
         }
-
-        return sGifService;
     }
 
-    /**Callback interface that must be implemented by objects wanting to retrieve data (GIFItems)
+    public static void flushCache() {
+        sGifService.mCache.evictAll();
+    }
+
+    /**Callback interfaces that must be implemented by objects wanting to retrieve data (GIFItems)
      * from the GifService class*/
-    public interface Callback {
-        void onDataLoaded(List<GifItem> dataSet);
-        void onDataLoaded(GifItem gifItem);
+    public static final class Callback {
+
+        public interface OnListDataLoadedListener {
+            void onDataLoaded(List<GifItem> dataSet);
+        }
+        public interface OnItemDataLoadedListener {
+            void onDataLoaded(GifItem gifItem);
+        }
     }
+
 
     /**Method used to query the GifService for specific GIFS
      * @param callback - Callback that dataSet will be passed to after fetching
      *@param query  - Query String
      * */
-    public void queryDatabaseAsync(Callback callback,String query) {
-        this.queryDatabaseAsync(callback,query,GifServiceAPI.DEFAULT_OFFSET);
+    public static void queryDatabaseAsync(Callback.OnListDataLoadedListener callback,String query) {
+        sGifService.queryDatabaseAsync(callback,query,GifServiceAPI.DEFAULT_OFFSET);
     }
 
     /**Method used to query the GifService for specific GIFS
@@ -84,7 +92,7 @@ public final class GifService {
      * @param query - Query String
      * @param offset - Next Position to fetch data
      * */
-    public void queryDatabaseAsync(final Callback callback,String query,int offset) {
+    public static void queryDatabaseAsync(final Callback.OnListDataLoadedListener callback,String query,int offset) {
 
         if(callback != null) {
 
@@ -92,13 +100,13 @@ public final class GifService {
             map.put("q",query);
             map.put("offset",String.valueOf(offset));
 
-            mGifServiceAPI.query(map)
+            sGifService.mGifServiceAPI.query(map)
                     .enqueue(new retrofit2.Callback<GifItemResults>() {
                         @Override
                         public void onResponse(Call<GifItemResults> call, Response<GifItemResults> response) {
 
                             if(response.isSuccessful()) {
-                                updateCache(response.body().getData());
+                                sGifService.updateCache(response.body().getData());
                                 callback.onDataLoaded(response.body().getData());
                             }
                         }
@@ -113,23 +121,23 @@ public final class GifService {
 
     /**Method used to query the GifService for Trending GIFS
      * @param callback - Callback that dataSet will be passed to after fetching*/
-    public void fetchTrendingFromDatabaseAsync(Callback callback) {
-        this.fetchTrendingFromDatabaseAsync(callback,GifServiceAPI.DEFAULT_OFFSET);
+    public static void fetchTrendingFromDatabaseAsync(Callback.OnListDataLoadedListener callback) {
+        sGifService.fetchTrendingFromDatabaseAsync(callback,GifServiceAPI.DEFAULT_OFFSET);
     }
 
     /**Method used to query the GifService for Trending GIFS
      * @param callback - Callback that dataSet will be passed to after fetching
      * @param offset - Next Position to fetch data*/
-    public void fetchTrendingFromDatabaseAsync(final Callback callback,int offset) {
+    public static void fetchTrendingFromDatabaseAsync(final Callback.OnListDataLoadedListener callback,int offset) {
 
         if(callback != null) {
-            mGifServiceAPI.queryTrending(offset)
+            sGifService.mGifServiceAPI.queryTrending(offset)
                     .enqueue(new retrofit2.Callback<GifItemResults>() {
                         @Override
                         public void onResponse(Call<GifItemResults> call, Response<GifItemResults> response) {
 
                             if (response.isSuccessful()) {
-                                updateCache(response.body().getData());
+                                sGifService.updateCache(response.body().getData());
                                 callback.onDataLoaded(response.body().getData());
                             }
                         }
@@ -152,10 +160,10 @@ public final class GifService {
             return;
         }
 
-        mCache.evictAll();
+        sGifService.mCache.evictAll();
 
         for (GifItem item: dataSet) {
-            mCache.put(item.getId(),item);
+            sGifService.mCache.put(item.getId(),item);
         }
     }
 
@@ -165,13 +173,13 @@ public final class GifService {
      * @param id - Gif ID
      * @param callback - Callback that dataSet will be passed to after fetching
      * */
-    public void fetchGifWithIdAsync(String id, final Callback callback) {
+    public static void fetchGifWithIdAsync(String id, final Callback.OnItemDataLoadedListener callback) {
 
         if(callback != null) {
 
             //If item is in local cache fetch it otherwise get it from the network
-            if(mCache != null) {
-                GifItem item = mCache.get(id);
+            if(sGifService.mCache != null) {
+                GifItem item = sGifService.mCache.get(id);
 
                 if(item != null) {
                     callback.onDataLoaded(item);
@@ -179,7 +187,7 @@ public final class GifService {
                 }
             }
 
-            mGifServiceAPI.queryId(id)
+            sGifService.mGifServiceAPI.queryId(id)
                     .enqueue(new retrofit2.Callback<GifItemResult>() {
                         @Override
                         public void onResponse(Call<GifItemResult> call, Response<GifItemResult> response) {
@@ -241,9 +249,8 @@ public final class GifService {
     }
 
     /**Method used to determine if the device is connected to a network*/
-    public boolean isNetworkAvailable() {
+    private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
         return cm.getActiveNetworkInfo() != null;
     }
 

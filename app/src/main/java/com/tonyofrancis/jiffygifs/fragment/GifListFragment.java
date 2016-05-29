@@ -26,7 +26,7 @@ import java.util.List;
  *
  */
 
-public class GifListFragment extends Fragment implements GifService.Callback{
+public class GifListFragment extends Fragment implements GifService.Callback.OnListDataLoadedListener{
 
     private GifListAdapter mGifListAdapter;
 
@@ -59,10 +59,45 @@ public class GifListFragment extends Fragment implements GifService.Callback{
         final int decorSize = getResources().getInteger(R.integer.space_decor_size);
         recyclerView.addItemDecoration(new SpacesItemDecoration(decorSize));
 
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            private ArrayMap<Integer,Boolean> mVisited = new ArrayMap<>();
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+            /*When the users scrolls to the last row in the list, the GifService object is
+            * asked to fetch more related data for the list*/
+                int[] lastVisibleItemsPosition = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
+                        .findLastVisibleItemPositions(null);
+
+                int max = 0;
+
+                for (int x = 0; x < lastVisibleItemsPosition.length;x++) {
+                    if (lastVisibleItemsPosition[x] > max) {
+                        max = lastVisibleItemsPosition[x];
+                    }
+                }
+
+                //If we are in the last row and we have not loaded this information previously, fetch
+                // more items for the gif service
+                if(max + lastVisibleItemsPosition.length >= mGifListAdapter.getItemCount() &&
+                        !mVisited.containsKey(mGifListAdapter.getItemCount())) {
+
+                    mVisited.put(mGifListAdapter.getItemCount(),true);
+                    GifService.fetchTrendingFromDatabaseAsync(GifListFragment.this,mGifListAdapter.getItemCount()+1);
+                }
+            }
+        });
 
         mGifListAdapter = new GifListAdapter(getActivity());
         recyclerView.setAdapter(mGifListAdapter);
-        recyclerView.addOnScrollListener(mOnScrollListener);
 
         return view;
     }
@@ -72,8 +107,7 @@ public class GifListFragment extends Fragment implements GifService.Callback{
         super.onStart();
 
         //When Fragment starts, fetch trending GIFS from GifService
-        GifService.getInstance(getActivity().getApplication())
-                .fetchTrendingFromDatabaseAsync(this);
+        GifService.fetchTrendingFromDatabaseAsync(this);
     }
 
     /** Callback method used by this fragment to receive the GIF dataSet
@@ -84,50 +118,5 @@ public class GifListFragment extends Fragment implements GifService.Callback{
     public void onDataLoaded(List<GifItem> dataSet) {
         mGifListAdapter.mergeDataSet(dataSet);
     }
-
-    @Override
-    public void onDataLoaded(GifItem gifItem) {
-
-    }
-
-    /**The mOnScrollListener object is attached to the recyclerView to implement
-     * infinite scrolling **/
-    private RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
-
-        private ArrayMap<Integer,Boolean> mVisited = new ArrayMap<>();
-
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            super.onScrollStateChanged(recyclerView, newState);
-        }
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            /*When the users scrolls to the last row in the list, the GifService object is
-            * asked to fetch more related data for the list*/
-            int[] lastVisibleItemsPosition = ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
-                                              .findLastVisibleItemPositions(null);
-
-                int max = 0;
-
-                for (int x = 0; x < lastVisibleItemsPosition.length;x++) {
-                    if (lastVisibleItemsPosition[x] > max) {
-                        max = lastVisibleItemsPosition[x];
-                    }
-                }
-
-            //If we are in the last row and we have not loaded this information previously, fetch
-            // more items for the gif service
-                if(max + lastVisibleItemsPosition.length >= mGifListAdapter.getItemCount() &&
-                        !mVisited.containsKey(mGifListAdapter.getItemCount())) {
-
-                    mVisited.put(mGifListAdapter.getItemCount(),true);
-                    GifService.getInstance(getActivity().getApplication())
-                            .fetchTrendingFromDatabaseAsync(GifListFragment.this,mGifListAdapter.getItemCount()+1);
-                }
-        }
-    };
 
 }

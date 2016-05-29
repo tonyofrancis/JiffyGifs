@@ -26,17 +26,13 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
 
         /*If a fragment is not attached to the activity, attach
         * the main fragment*/
-
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
 
-        if (fragment == null) {
+        if (fragmentManager.findFragmentById(R.id.fragment_container) == null) {
 
-            fragment = createFragment();
             fragmentManager.beginTransaction()
-                    .add(R.id.fragment_container,fragment)
+                    .add(R.id.fragment_container,createFragment())
                     .commit();
         }
     }
-
 }

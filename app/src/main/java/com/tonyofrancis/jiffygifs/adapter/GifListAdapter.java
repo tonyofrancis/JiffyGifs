@@ -1,6 +1,7 @@
 package com.tonyofrancis.jiffygifs.adapter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,9 @@ import com.tonyofrancis.jiffygifs.model.GifItem;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by tonyofrancis on 5/20/16.
@@ -37,18 +41,13 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
 
     @Override
     public GifViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
         return new GifViewHolder(LayoutInflater.from(mContext).inflate(viewType,parent,false));
     }
 
     @Override
     public int getItemViewType(int position) {
-
-        //Get the proper view type for a gif item based on its position
-        if(position % 2 == 0) {
-            return R.layout.gif_item_one;
-        }
-
-        return R.layout.gif_item_two;
+        return R.layout.gif_item;
     }
 
     @Override
@@ -86,28 +85,29 @@ public class GifListAdapter extends RecyclerView.Adapter<GifListAdapter.GifViewH
             return;
         }
 
-        int currentSize = getItemCount();
+        int updatePosition = getItemCount() + 1;
         mDataSet.addAll(newDataSet);
-        notifyItemRangeInserted(currentSize+1,newDataSet.size());
+        notifyItemRangeInserted(updatePosition,newDataSet.size());
     }
 
     public static class GifViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private ImageView mImageView;
+        @BindView(R.id.gif_image_view)
+        protected ImageView mImageView;
+
         private String id;
 
         public GifViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
-            mImageView = (ImageView) itemView.findViewById(R.id.gif_image_view);
+            ButterKnife.bind(this,itemView);
         }
 
         public void bind(GifItem gifItem) {
             this.id = gifItem.getId();
 
-            //Display GIF Still image into the ImageView
             Picasso.with(mImageView.getContext())
-                    .load(gifItem.getImages().getOriginal_still().getUrl())
+                    .load(Uri.parse(gifItem.getImages().getFixed_width().getUrl()))
                     .into(mImageView);
 
         }

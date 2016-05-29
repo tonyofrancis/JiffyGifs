@@ -30,7 +30,7 @@ public final class GifItem {
     public static class Images {
 
         private Original original;
-        private Original original_still;
+        private Original fixed_width;
 
         public Original getOriginal() {
             return original;
@@ -40,12 +40,12 @@ public final class GifItem {
             this.original = original;
         }
 
-        public Original getOriginal_still() {
-            return original_still;
+        public Original getFixed_width() {
+            return fixed_width;
         }
 
-        public void setOriginal_still(Original original_stills) {
-            this.original_still = original_stills;
+        public void setFixed_width(Original fixed_width) {
+            this.fixed_width = fixed_width;
         }
     }
 
@@ -55,7 +55,7 @@ public final class GifItem {
         private String url;
         private int width;
         private int height;
-        private String mp4;
+        private String webp;
 
         public String getUrl() {
             return url;
@@ -81,12 +81,12 @@ public final class GifItem {
             this.height = height;
         }
 
-        public String getMp4() {
-            return mp4;
+        public String getWebp() {
+            return webp;
         }
 
-        public void setMp4(String mp4) {
-            this.mp4 = mp4;
+        public void setWebp(String webp) {
+            this.webp = webp;
         }
     }
 

@@ -17,6 +17,9 @@ import android.view.ViewGroup;
 import com.tonyofrancis.jiffygifs.R;
 import com.tonyofrancis.jiffygifs.helpers.Searchable;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by tonyofrancis on 5/22/16.
  *
@@ -28,8 +31,10 @@ import com.tonyofrancis.jiffygifs.helpers.Searchable;
 
 public class GifViewPagerFragment extends Fragment {
 
+    @BindView(R.id.gif_view_pager)
+    protected ViewPager mViewPager;
+
     private Fragment[] mFragments;
-    private ViewPager mViewPager;
 
     /**Static method used to get a properly formatted GifViewPagerFragment
      * @return - properly formatted GifViewPagerFragment
@@ -63,9 +68,8 @@ public class GifViewPagerFragment extends Fragment {
         super.onCreateView(inflater,container,savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_gif_view_pager,container,false);
+        ButterKnife.bind(this,view);
 
-
-        mViewPager = (ViewPager) view.findViewById(R.id.gif_view_pager);
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.gif_tab_layout);
 
         /*Setup ViewPager with a state adapter. The adapter saves the state
@@ -73,7 +77,6 @@ public class GifViewPagerFragment extends Fragment {
         mViewPager.setAdapter(new FragmentStatePagerAdapter(getFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-
                 return mFragments[position];
             }
 

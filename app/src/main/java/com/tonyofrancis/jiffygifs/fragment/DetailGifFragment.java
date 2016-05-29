@@ -1,20 +1,24 @@
 package com.tonyofrancis.jiffygifs.fragment;
 
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.VideoView;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.drawable.ProgressBarDrawable;
+import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
+import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.tonyofrancis.jiffygifs.R;
 import com.tonyofrancis.jiffygifs.api.GifService;
 import com.tonyofrancis.jiffygifs.model.GifItem;
 
-import java.util.List;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by tonyofrancis on 5/21/16.
@@ -26,12 +30,14 @@ import java.util.List;
  *
  */
 
-public class DetailGifFragment extends Fragment implements GifService.Callback {
+public class DetailGifFragment extends Fragment implements GifService.Callback.OnItemDataLoadedListener {
 
     private static final String GIF_ID = "com.tonyofrancis.fragments.gif_id";
 
     private String mGifId;
-    private VideoView mVideoView;
+
+    @BindView(R.id.gif_video_view)
+    protected SimpleDraweeView mSimpleDraweeView;
 
     /**Static method used to get a properly formatted DetailGifFragment
      * @param id - The id string of a GifItem
@@ -64,14 +70,13 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
         super.onCreateView(inflater,container,savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_gif_detail,container,false);
+        ButterKnife.bind(this,view);
 
-        mVideoView = (VideoView) view.findViewById(R.id.gif_video_view);
-        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setLooping(true);
-            }
-        });
+        GenericDraweeHierarchyBuilder builder = new GenericDraweeHierarchyBuilder(getResources());
+        ProgressBarDrawable progressBarDrawable = new ProgressBarDrawable();
+        progressBarDrawable.setColor(ResourcesCompat.getColor(getResources(),R.color.colorAccent,null));
+
+        mSimpleDraweeView.setHierarchy(builder.setProgressBarImage(progressBarDrawable).build());
 
         return view;
     }
@@ -85,31 +90,14 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         outState.putString(GIF_ID,mGifId);
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        GifService.getInstance(getActivity().getApplication())
-                .fetchGifWithIdAsync(mGifId,this);
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        if(mVideoView.isPlaying()) {
-            mVideoView.stopPlayback();
-        }
-    }
-
-    @Override
-    public void onDataLoaded(List<GifItem> dataSet) {
+        GifService.fetchGifWithIdAsync(mGifId,this);
 
     }
 
@@ -119,9 +107,11 @@ public class DetailGifFragment extends Fragment implements GifService.Callback {
     @Override
     public void onDataLoaded(GifItem gifItem) {
 
-        Uri uri = Uri.parse(gifItem.getImages().getOriginal().getMp4());
-        mVideoView.setVideoURI(uri);
-        mVideoView.requestFocus();
-        mVideoView.start();
+        DraweeController draweeController = Fresco.newDraweeControllerBuilder()
+                .setUri(gifItem.getImages().getOriginal().getWebp())
+                .setAutoPlayAnimations(true)
+                .build();
+
+        mSimpleDraweeView.setController(draweeController);
     }
 }

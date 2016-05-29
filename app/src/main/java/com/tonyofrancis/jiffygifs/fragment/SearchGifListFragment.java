@@ -28,7 +28,7 @@ import java.util.List;
  *
  */
 
-public class SearchGifListFragment extends Fragment implements Searchable, GifService.Callback {
+public class SearchGifListFragment extends Fragment implements Searchable, GifService.Callback.OnListDataLoadedListener {
 
     private static final String QUERY = "com.tonyofrancis.search.query";
 
@@ -60,8 +60,7 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
         mQuery = query;
         isNewSearch = true;
 
-        GifService.getInstance(getActivity().getApplication())
-                .queryDatabaseAsync(this, mQuery);
+        GifService.queryDatabaseAsync(this, mQuery);
 
         return true;
     }
@@ -92,8 +91,7 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
     public void onStart() {
         super.onStart();
 
-        GifService.getInstance(getActivity().getApplication())
-                .queryDatabaseAsync(this,mQuery);
+        GifService.queryDatabaseAsync(this,mQuery);
     }
 
     @Nullable
@@ -139,11 +137,6 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
         isNewSearch = false;
     }
 
-    @Override
-    public void onDataLoaded(GifItem gifItem) {
-
-    }
-
     /**The mOnScrollListener object is attached to the recyclerView to implement
      * infinite scrolling **/
     private RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
@@ -176,8 +169,7 @@ public class SearchGifListFragment extends Fragment implements Searchable, GifSe
                         !mVisited.containsKey(mGifListAdapter.getItemCount())) {
 
                     mVisited.put(mGifListAdapter.getItemCount(),true);
-                    GifService.getInstance(getActivity().getApplication())
-                            .queryDatabaseAsync(SearchGifListFragment.this,mQuery,mGifListAdapter.getItemCount() + 1);
+                    GifService.queryDatabaseAsync(SearchGifListFragment.this,mQuery,mGifListAdapter.getItemCount() + 1);
                 }
         }
     };
